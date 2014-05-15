@@ -4,21 +4,20 @@
  */
 
 var express = require('express');
-var http = require('http');
-var path = require('path');
+var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+
+var Applicant = require('./models/applicant.js');
 
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3001);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(express.favicon());
-app.use(express.logger('dev'));
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname + '/public'));
+app.use(bodyParser());
 
+mongoose.connect('mongodb://localhost/job');
 
 //renders the index page
 app.get('/', function(req, res){
@@ -34,8 +33,28 @@ app.get('/applicants', function(req, res){
 app.post('/applicant', function(req, res){
 	// Here is where you need to get the data
 	// from the post body and store it
+	
+	// console.log(req.body);
+	// res.send('Success!');
+	var newApplicant = new Applicant({
+		name: req.body.name,
+		bio: req.body.bio,
+		skills: req.body.skills,
+		years: req.body.years,
+		why: req.body.why
+	});
+
+	newApplicant.save(function(err, data) {
+		if(err) {
+			console.log(err);
+			res.send(500, 'There was an error saving');
+			return;
+		}
+
+		res.send(201, 'Success!');
+	})
 });
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+var server = app.listen(3001, function() {
+	console.log('Express server listening on port ' + server.address().port);
 });
