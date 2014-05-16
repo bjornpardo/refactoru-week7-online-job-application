@@ -26,7 +26,17 @@ app.get('/', function(req, res){
 
 // displays a list of applicants
 app.get('/applicants', function(req, res){
-	res.render('applicants')
+	Applicant.find({}, function(err, applicants) {
+		console.log(applicants);
+		if(err){
+			console.log(err);
+			res.send(500, "Error");
+			// return;
+		}
+		res.render('applicants',{
+			applicants: applicants
+		})
+	});
 });
 
 // creates and applicant
